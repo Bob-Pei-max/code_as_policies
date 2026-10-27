@@ -1,0 +1,32 @@
+# Local environments and package caches.
+.venv/
+venv/
+.conda-env/
+.conda-pkgs/
+.upstream-clone-incomplete/
+
+# Python and editor caches.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# Large, reproducible resources; keep their provenance in Git.
+/assets/*
+!/assets/manifest.json
+/outputs/
+/dist/
+/build/
+*.egg-info/
+
+# Local secrets and operating-system files.
+.env
+.env.*
+!.env.example
+*.log
+Thumbs.db
+.DS_Store

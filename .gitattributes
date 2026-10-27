@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+
+# Preserve the exact bytes covered by upstream.json hashes.
+code_as_policies/** -text

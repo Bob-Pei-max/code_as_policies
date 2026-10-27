@@ -1,0 +1,20 @@
+[
+  {
+    "asset": "ur5e",
+    "drive_id": "1Cc_fDSBL6QiDvNT4dpfAEbhbALSVoWcc",
+    "sha256": "fb35b7a6c2486612dd6b7a776d971593e86a98674ee2f786849489adfa77684d",
+    "bytes": 2942721
+  },
+  {
+    "asset": "robotiq_2f_85",
+    "drive_id": "1yOMEm-Zp_DL3nItG9RozPeJAmeOldekX",
+    "sha256": "48feb2e373967bc00320774e36983e512b49f1d30ad6d2b880f00be7bddfe44f",
+    "bytes": 2330015
+  },
+  {
+    "asset": "bowl",
+    "drive_id": "1GsqNLhEl9dd4Mc3BM0dX3MibOI1FVWNM",
+    "sha256": "497f5ed586df0686aad4a993365085d4d14443566babb5475e722b040bd3ea7d",
+    "bytes": 181150
+  }
+]

@@ -1,0 +1,13 @@
+name: cap-offline
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.10.22
+  - numpy=1.26.4
+  - pybullet=3.25
+  - pip
+  - pip:
+      - imageio==2.37.0
+      - imageio-ffmpeg==0.6.0
+      - pillow==11.3.0

@@ -1,0 +1,5 @@
+# Pip-only packages installed after conda-explicit-win-64.txt.
+# Conda supplies Python, NumPy and PyBullet; see environment.yml.
+imageio==2.37.0
+imageio-ffmpeg==0.6.0
+pillow==11.3.0

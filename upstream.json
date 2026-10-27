@@ -1,0 +1,25 @@
+{
+  "commit": "0f585ccae259c32a877edfd48362c18a0010545f",
+  "files": [
+    {
+      "file": "README.md",
+      "url": "https://raw.githubusercontent.com/google-research/google-research/0f585ccae259c32a877edfd48362c18a0010545f/code_as_policies/README.md",
+      "sha256": "44c43d47213693848edd1969042e60d9061ac9955993771c41e54b9f7c426e2c"
+    },
+    {
+      "file": "Interactive_Demo.ipynb",
+      "url": "https://raw.githubusercontent.com/google-research/google-research/0f585ccae259c32a877edfd48362c18a0010545f/code_as_policies/Interactive_Demo.ipynb",
+      "sha256": "2306281e405b0642400c039dde01684fd200188821eb8cbf243d00b140d2eb72"
+    },
+    {
+      "file": "LMP Examples.ipynb",
+      "url": "https://raw.githubusercontent.com/google-research/google-research/0f585ccae259c32a877edfd48362c18a0010545f/code_as_policies/LMP%20Examples.ipynb",
+      "sha256": "7c7ee00edd80891032f36fa9e18f21661af43b15deaa4c860cbbca03e5c4c9b2"
+    },
+    {
+      "file": "LICENSE",
+      "url": "https://raw.githubusercontent.com/google-research/google-research/0f585ccae259c32a877edfd48362c18a0010545f/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    }
+  ]
+}
