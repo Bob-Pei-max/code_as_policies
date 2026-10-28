@@ -24,12 +24,13 @@ from upstream_env import PickPlaceEnv
 class LocalEnv(PickPlaceEnv):
     """Original physics plus deterministic mimic joints and desktop recording."""
 
-    def __init__(self, writer, max_steps=48000):
+    def __init__(self, writer, max_steps=48000, trace_objects=('blue block',)):
         super().__init__(render=False)
         self.writer = writer
         self.max_steps = max_steps
         self.frames = 0
         self.trace = []
+        self.trace_objects = tuple(trace_objects)
 
     def get_camera_image(self):
         view = p.computeViewMatrix([0.72, -1.15, 0.72], [0, -0.42, 0.10], [0, 0, 1])
@@ -53,8 +54,8 @@ class LocalEnv(PickPlaceEnv):
             )
         p.stepSimulation()
         self.sim_step += 1
-        block = self.get_obj_pos('blue block').tolist()
-        self.trace.append([self.sim_step, *block])
+        positions = [coordinate for name in self.trace_objects for coordinate in self.get_obj_pos(name).tolist()]
+        self.trace.append([self.sim_step, *positions])
         if self.sim_step % 40 == 0:
             self.record_frame()
 

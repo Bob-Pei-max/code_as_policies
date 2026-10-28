@@ -1,0 +1,4 @@
+{
+  "objects": ["blue block", "yellow bowl"],
+  "goals": [{"pick": "blue block", "place": "yellow bowl"}]
+}

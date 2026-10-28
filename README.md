@@ -10,10 +10,16 @@ cap-study/
 ├── run_demo.cmd              # Windows 离线演示入口
 ├── run_python.cmd            # 在本项目 Conda 环境中执行 Python
 ├── run_offline.py            # 抓放、录制、状态记录与成功检查
+├── run_planner.py            # 模型生成/文件回放、程序校验与可选仿真
+├── config/model.json         # 百炼地址与模型标识（不含密钥）
 ├── build_env.py              # 提取官方代码并应用本地适配
 ├── bootstrap_source.py       # 恢复并校验官方源码快照
 ├── download_assets.py        # 下载并校验仿真资源
 ├── src/upstream_env.py       # 生成的仿真环境，不直接编辑
+├── src/planning.py           # 程序来源接口、提示词与受限 AST 解释器
+├── src/model_provider.py     # 百炼 Qwen HTTPS 适配器
+├── src/plan_execution.py     # 可信动作执行器与独立目标检查
+├── examples/planning/       # 手写程序样例和场景评估目标
 ├── code_as_policies/         # 原始 Notebook、README、许可证
 ├── assets/manifest.json      # 资源来源与固定 SHA-256
 ├── tests/                    # 无网络的回归检查
@@ -61,6 +67,30 @@ Git 仓库不包含资源压缩包和 Conda 环境，因此新电脑仍需联网
 
 实测结果（seed=0）：积木最高抬升 0.1675 米，放置后与碗中心的水平距离为 0.01094 米；官方 `on_top_of` 判定和额外的抬升检查均通过。用时约 40 秒，视频 99 帧、12 fps，时长约 8.25 秒。视频和最终截图也已检查。
 
+第二阶段已接通百炼 Qwen，完成“自然语言 → 模型生成程序 → 受限校验 → 仿真 → 独立目标检查”。2026-10-28，`qwen3.7-plus-2026-05-26` 在 seed=0 的单物体、双色同色和交叉放置任务均通过；37 项离线测试与生成文件检查通过。**手写文件回放**仍是独立的离线入口，不理解任务文字。详见 [任务规划接口、模型配置与验证](docs/planning.md)。
+
+```powershell
+# 仅校验并保存程序、提示词和动作列表；加 --execute 才启动物理仿真。
+.\run_python.cmd run_planner.py --task "把各个积木放进对应颜色的碗" --scene examples/planning/match_colors.json --program-file examples/planning/match_colors.py
+```
+
+新入口默认使用唯一输出目录，也会拒绝覆盖显式指定的已有目录。`examples/planning/*.json` 中的 `goals` 是独立评估目标，不会提供给模型提示词；运行结果区分程序校验、物理动作执行与任务目标检查。
+
+`config/model.json` 已设置北京工作空间地址及 `qwen3.7-plus-2026-05-26`。在 Windows 用户环境变量中配置 `DASHSCOPE_API_KEY` 后打开新终端，使用模型生成程序：
+
+```powershell
+# 会调用 API；生成程序通过受限校验后才可执行，不直接 exec/eval。
+.\run_python.cmd run_planner.py --task "把各个积木放进对应颜色的碗" --scene examples/planning/match_colors.json --model-api --execute --seed 0
+```
+
+省略 `--execute` 可先验证程序生成。模型模式与文件模式必须二选一；密钥仅从本机环境变量读取，不写进项目或聊天。地址/模型可由 CLI 或环境变量覆盖，详见上述配置文档。
+
+真实模型验收的视频：[单物体](outputs/qwen_single_seed0_20261028_036aa58e/demo.mp4)、[同色放置](outputs/qwen_colors_seed0_20261028_1720aac4/demo.mp4)、[交叉放置](outputs/qwen_cross_seed0_20261028_8c9a6b8e/demo.mp4)。后两项初始场景完全一致，改变指令后模型生成的目标随之改变；目标标签未发送给模型。三次结果均 `model_api_used=true`、`task_success=true`，已检查轨迹与视频。链接指向本机输出，克隆仓库不会携带这些文件。
+
+首次真实回复使用了未支持的 `and`，被校验器拒绝；失败记录保存在 `outputs/qwen_single_seed0_20261028_28dfd22b/`。随后明确了提示词的语法限制，再由模型重新生成；没有编辑回复或放宽校验。这是开发验收，不能据此报告多任务、多种子的统计成功率。
+
+2026-10-27 本轮验证：20 项单元测试及生成文件检查通过；原入口和新入口单次抓放均通过 seed=0，单次轨迹数值与既有基线一致。双色文件程序的蓝块 → 蓝碗、红块 → 红碗也通过独立目标检查，共 6573 步、182 帧；已检查轨迹有限值和视频抽帧。结果位于 `outputs/planning_regression_seed0_20261027_a9d1/`、`outputs/planning_single_seed0_20261027_a9d1/` 和 `outputs/planning_colors_seed0_20261027_a9d1/`。这些不是模型驱动结果，也不是多种子成功率。
+
 ## 现在怎么操作
 
 1. 打开 `outputs/offline_seed0/demo.mp4`，先看抓取、搬运、放置的完整过程。
@@ -98,7 +128,7 @@ env.step({
 })
 ```
 
-这里的坐标来自仿真环境的物体状态，不是通过摄像头识别得到的。当前动作由程序明确指定；之后再让语言模型根据自然语言生成这类调用。
+这里的坐标来自仿真环境的物体状态，不是通过摄像头识别得到的。`run_offline.py` 直接指定对象；`run_planner.py --model-api` 则让模型根据任务生成对象名动作，再由可信 worker 读取对应坐标并调用运动流程。
 
 ## 怎么用 Codex 学这个项目
 
@@ -115,11 +145,11 @@ env.step({
 | 阶段 | 验收标准 | 当前状态 |
 | --- | --- | --- |
 | 1. 离线物理抓放 | 有视频、有状态轨迹、抓起并落到碗中 | 已通过 seed=0 |
-| 2. 文本生成控制代码 | 输入一条指令，保存模型返回的代码并检查调用 | 待接入模型 API |
-| 3. 语言控制仿真 | 模型生成的调用驱动同一个环境，并检查最终状态 | 待完成 |
+| 2. 文本生成控制代码 | 输入一条指令，保存模型返回的代码并检查调用 | Qwen 真实生成已通过；保留首次语法失败记录 |
+| 3. 语言控制仿真 | 模型生成的调用驱动同一个环境，并检查最终状态 | seed=0 单物体、同色与交叉放置通过独立目标检查 |
 | 4. 实验复现 | 多任务、多随机种子、固定提示词和模型配置，统计成功率 | 待完成 |
 
-官方旧 Notebook 使用 `code-davinci-002` 和旧版 `openai.Completion.create`，后续需要迁移模型接口；不要照着旧 Notebook 一次性执行所有单元。当前项目没有安装 OpenAI SDK，也没有读取、保存或调用 API Key。将来配置密钥使用本机环境变量，不写进源码或聊天记录。
+官方旧 Notebook 使用 `code-davinci-002` 和旧版 `openai.Completion.create`；不要照着旧 Notebook 一次性执行所有单元。当前百炼适配器使用标准库 HTTPS，没有安装 OpenAI SDK 或新增依赖；Qwen 是替代模型方案，已通过的有限任务验收不等于完整论文复现。
 
 ## 来源与本地调整
 
@@ -155,6 +185,8 @@ env.step({
 ```
 
 上述测试不联网；资源检查需要已下载的压缩包和已解压的 URDF。单元测试覆盖官方快照、生成文件一致性、资源篡改和解压路径越界。修改 `build_env.py` 后运行 `.\run_python.cmd build_env.py`，同时保留生成文件进入 Git。
+
+任务规划测试还覆盖语法与资源限额、对象校验、循环动作顺序、回放来源声明、独立目标、超时记录和禁止覆盖已有结果。模型测试使用模拟 HTTP，覆盖请求、配置、错误和执行前拦截；通过这些测试不代表真实服务调用或语言控制已通过。
 
 修改机械臂控制、生成环境或启动器后，再运行完整演示并选择新的输出目录。检查退出码、`result.json`、状态轨迹以及视频，不能只凭单元测试通过宣称物理抓放成功。
 

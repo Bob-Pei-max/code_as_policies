@@ -1,0 +1,7 @@
+{
+  "objects": ["blue block", "red block", "blue bowl", "red bowl"],
+  "goals": [
+    {"pick": "blue block", "place": "blue bowl"},
+    {"pick": "red block", "place": "red bowl"}
+  ]
+}
