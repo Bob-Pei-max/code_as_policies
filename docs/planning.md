@@ -41,7 +41,7 @@
 
 ## 百炼模型调用
 
-`config/model.json` 已配置用户提供的北京工作空间地址与快照 `qwen3.7-plus-2026-05-26`，其中只有 `base_url` 和 `model`，不接受密钥字段。地址按 [官方工作空间域名规则](https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope) 拼接 `/chat/completions`；提供完整接口地址也可识别。
+`config/model.json` 只保存占位地址与快照 `qwen3.7-plus-2026-05-26`，其中只有 `base_url` 和 `model`，不接受密钥字段，也不写入真实工作空间地址；实际地址由本机环境变量 `CAP_MODEL_BASE_URL` 或 CLI `--base-url` 提供。地址按 [官方工作空间域名规则](https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope) 拼接 `/chat/completions`；提供完整接口地址也可识别。
 
 先在 Windows“编辑账户的环境变量”中新增用户变量 `DASHSCOPE_API_KEY`，值填写该北京地域的 API Key。不要写入源码、命令行参数或聊天。设置后打开新终端；已经运行的终端或 Codex 不会自动继承新值。也可以在当前 PowerShell 中只读取已保存的用户变量，不输出内容：
 

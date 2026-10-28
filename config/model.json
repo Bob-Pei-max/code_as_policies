@@ -1,4 +1,4 @@
 {
-  "base_url": "https://ws-guk8d5uoj40uywue.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "base_url": "https://<your-workspace-id>.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
   "model": "qwen3.7-plus-2026-05-26"
 }

@@ -1,17 +1,21 @@
 # Code as Policies：从离线抓放开始
 
+> **非官方仓库**：本项目是个人学习性复现，与 Google Research 没有隶属或背书关系。官方项目见 <https://code-as-policies.github.io/>，官方源码见 [google-research/code_as_policies](https://github.com/google-research/google-research/tree/master/code_as_policies)。本仓库按 Apache 2.0 授权分发，来源说明与本地改动见 [NOTICE](NOTICE)，授权全文见 [LICENSE](LICENSE)。
+
 本仓库是 Code as Policies 官方仿真环境的 Windows 本地学习与复现入口。实际 Git 根目录是 `cap-study/`。AI 协作者先阅读 [AGENTS.md](AGENTS.md)，最近一次仓库整理见 [维护记录](docs/maintenance.md)。
 
 ## 目录结构
 
 ```text
 cap-study/
+├── LICENSE                   # Apache 2.0 授权全文
+├── NOTICE                    # 衍生来源与本地改动声明
 ├── AGENTS.md                 # 项目事实、操作约定与完成标准
 ├── run_demo.cmd              # Windows 离线演示入口
 ├── run_python.cmd            # 在本项目 Conda 环境中执行 Python
 ├── run_offline.py            # 抓放、录制、状态记录与成功检查
 ├── run_planner.py            # 模型生成/文件回放、程序校验与可选仿真
-├── config/model.json         # 百炼地址与模型标识（不含密钥）
+├── config/model.json         # 百炼地址占位符与模型标识（不含密钥）
 ├── build_env.py              # 提取官方代码并应用本地适配
 ├── bootstrap_source.py       # 恢复并校验官方源码快照
 ├── download_assets.py        # 下载并校验仿真资源
@@ -76,7 +80,7 @@ Git 仓库不包含资源压缩包和 Conda 环境，因此新电脑仍需联网
 
 新入口默认使用唯一输出目录，也会拒绝覆盖显式指定的已有目录。`examples/planning/*.json` 中的 `goals` 是独立评估目标，不会提供给模型提示词；运行结果区分程序校验、物理动作执行与任务目标检查。
 
-`config/model.json` 已设置北京工作空间地址及 `qwen3.7-plus-2026-05-26`。在 Windows 用户环境变量中配置 `DASHSCOPE_API_KEY` 后打开新终端，使用模型生成程序：
+`config/model.json` 只保存占位地址与模型标识 `qwen3.7-plus-2026-05-26`，不含密钥，也不含任何真实工作空间地址。启用模型生成前，先在本机的 Windows 用户环境变量中配置 `DASHSCOPE_API_KEY` 与 `CAP_MODEL_BASE_URL`（你的百炼工作空间地址），再打开新终端：
 
 ```powershell
 # 会调用 API；生成程序通过受限校验后才可执行，不直接 exec/eval。
@@ -97,7 +101,7 @@ Git 仓库不包含资源压缩包和 Conda 环境，因此新电脑仍需联网
 2. 在 PowerShell 中执行下列两行，亲自重复一次：
 
 ```powershell
-cd 'D:\任务规划：Code as Policies\cap-study'
+cd '<你的本地仓库路径>\cap-study'
 .\run_demo.cmd
 ```
 
@@ -161,7 +165,7 @@ env.step({
 - 本地适配：夹爪联动改为在 `LocalEnv` 的物理步中同步更新，移除停用线程及其重置逻辑；移除未被调用且依赖不存在的 `moving()` 的 `check_grasp()`；修正相机方法中的全局变量引用；使用 CPU 渲染；将 PyBullet 内置数据路径转成相对路径以支持当前 Windows 中文目录。
 - `run_offline.py` 增加固定随机种子、相机视角、视频记录、步数上限和结果检查。原始 Notebook 保持原样。
 
-这些改动意味着它是基于官方环境的本地适配版本，并非对论文所有运行条件的逐项复刻。项目内保留原始 Apache 2.0 许可证。
+这些改动意味着它是基于官方环境的本地适配版本，并非对论文所有运行条件的逐项复刻。根目录 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 声明 Apache 2.0 授权与衍生来源，`code_as_policies/` 内保留官方原始许可证。
 
 ## 环境与输出
 

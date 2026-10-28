@@ -68,7 +68,7 @@
 ### 下一阶段：固定配置的多任务、多种子评估
 
 1. 已阅读原始 `Interactive_Demo.ipynb` 的 `LMP.__call__`、`LMPFGen`、`LMP_wrapper` 和 `setup_LMP`；对应关系记录在 `docs/planning.md`。本地没有直接调用这条旧 API 链路；递归辅助函数生成、会话记忆和完整几何 API 尚未实现，未知函数会被拒绝。
-2. `src/model_provider.py` 已实现 `ProgramProvider.generate(messages) -> ProgramReply`，CLI 的 `--model-api` 与 `--program-file` 二选一。`config/model.json` 仅保存用户提供的北京工作空间地址及 `qwen3.7-plus-2026-05-26`；密钥从 `DASHSCOPE_API_KEY` 读取。地址/模型覆盖优先级为 CLI、环境变量、配置文件，不自动更换模型。官方旧 `openai.Completion.create` / `code-davinci-002` 保留原样。
+2. `src/model_provider.py` 已实现 `ProgramProvider.generate(messages) -> ProgramReply`，CLI 的 `--model-api` 与 `--program-file` 二选一。`config/model.json` 仅保存地址占位符及 `qwen3.7-plus-2026-05-26`，真实工作空间地址由本机环境变量 `CAP_MODEL_BASE_URL` 提供；密钥从 `DASHSCOPE_API_KEY` 读取。地址/模型覆盖优先级为 CLI、环境变量、配置文件，不自动更换模型。官方旧 `openai.Completion.create` / `code-davinci-002` 保留原样。
 3. 最小语言验收已完成。后续固定当前提示词与模型配置，预先定义任务和独立目标，跨多个 seed 记录全部成功、拒绝、规划失败和物理失败；不要边调提示词边汇报统一成功率。
 4. `model_api_used=true` 表示尝试发出 HTTP 请求，含失败；需结合 `provider.response_received` / `reply_accepted`、`plan_validated` 与 `task_success` 判定各阶段。缺密钥时不发请求且为 false。继续保存无凭据配置、用量、回复和失败，不保存 HTTP 密钥、错误正文或思考内容；辅助函数仍不支持。
 

@@ -1,0 +1,32 @@
+cap-study — a personal study reproduction of "Code as Policies"
+
+Copyright 2026 Bob-Pei-max
+
+This repository is NOT an official Google project. It is an independent,
+personal reproduction and learning exercise built on the public code
+release of "Code as Policies: Language Model Programs for Embodied
+Control" (Liang et al., 2022).
+
+Portions of this repository are derived from:
+
+  google-research/google-research, path code_as_policies
+  https://github.com/google-research/google-research/tree/master/code_as_policies
+  Pinned commit: 0f585ccae259c32a877edfd48362c18a0010545f
+  Copyright 2022 Google LLC
+  Licensed under the Apache License, Version 2.0
+
+Specifically:
+
+  - code_as_policies/ contains upstream files kept as-is, including the
+    original notebook, README and Apache 2.0 license.
+  - src/upstream_env.py is generated from cells 7-9 (0-indexed) of the
+    upstream notebook by build_env.py.
+  - All remaining files are local additions or adaptations. The list of
+    local changes is recorded in README.md.
+
+Simulation assets used by the upstream demo are not redistributed here.
+They are fetched at setup time and verified against the SHA-256 values in
+assets/manifest.json.
+
+This repository is distributed under the Apache License, Version 2.0.
+See LICENSE for the full text.
