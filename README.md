@@ -15,6 +15,7 @@ cap-study/
 ├── run_python.cmd            # 在本项目 Conda 环境中执行 Python
 ├── run_offline.py            # 抓放、录制、状态记录与成功检查
 ├── run_planner.py            # 模型生成/文件回放、程序校验与可选仿真
+├── run_evaluation.py         # 固定任务/seed 批量评估、失败记录与汇总
 ├── config/model.json         # 百炼地址占位符与模型标识（不含密钥）
 ├── build_env.py              # 提取官方代码并应用本地适配
 ├── bootstrap_source.py       # 恢复并校验官方源码快照
@@ -23,7 +24,9 @@ cap-study/
 ├── src/planning.py           # 程序来源接口、提示词与受限 AST 解释器
 ├── src/model_provider.py     # 百炼 Qwen HTTPS 适配器
 ├── src/plan_execution.py     # 可信动作执行器与独立目标检查
+├── src/evaluation.py         # 评估清单校验与分阶段结果统计
 ├── examples/planning/       # 手写程序样例和场景评估目标
+├── examples/evaluation/     # 预先定义的任务与随机种子清单
 ├── code_as_policies/         # 原始 Notebook、README、许可证
 ├── assets/manifest.json      # 资源来源与固定 SHA-256
 ├── tests/                    # 无网络的回归检查
@@ -67,6 +70,8 @@ Git 仓库不包含资源压缩包和 Conda 环境，因此新电脑仍需联网
 
 ## 当前进度
 
+2026-10-29 完成固定开发基线：三类任务 × seed 0–4，15 次真实模型生成与仿真全部通过，25 个独立目标全部满足；本轮 48 项测试、生成文件及资源检查通过。未修改模型提示词或物理参数，未重试或替换失败回复，全部视频与轨迹已核验。这是当前受限抓放链路的小规模结果，尚未覆盖论文任务集、分层函数生成、空间推理或基线比较。详见 [评估协议与实测结果](docs/evaluation.md)。
+
 第一阶段已运行成功：使用官方 UR5e 机械臂、Robotiq 夹爪和 PyBullet 场景，将蓝色积木抓起并放入黄色碗中。此阶段不调用语言模型，不需要 API Key，运行时不需要联网。它验证了机械臂动作和仿真环境，还不代表完成了论文的自然语言控制或全部实验复现。
 
 实测结果（seed=0）：积木最高抬升 0.1675 米，放置后与碗中心的水平距离为 0.01094 米；官方 `on_top_of` 判定和额外的抬升检查均通过。用时约 40 秒，视频 99 帧、12 fps，时长约 8.25 秒。视频和最终截图也已检查。
@@ -96,6 +101,18 @@ Git 仓库不包含资源压缩包和 Conda 环境，因此新电脑仍需联网
 2026-10-27 本轮验证：20 项单元测试及生成文件检查通过；原入口和新入口单次抓放均通过 seed=0，单次轨迹数值与既有基线一致。双色文件程序的蓝块 → 蓝碗、红块 → 红碗也通过独立目标检查，共 6573 步、182 帧；已检查轨迹有限值和视频抽帧。结果位于 `outputs/planning_regression_seed0_20261027_a9d1/`、`outputs/planning_single_seed0_20261027_a9d1/` 和 `outputs/planning_colors_seed0_20261027_a9d1/`。这些不是模型驱动结果，也不是多种子成功率。
 
 ## 现在怎么操作
+
+固定多种子评估入口和协议见 [评估说明](docs/evaluation.md)。默认清单为三类抓放任务 × seed 0–4，共 15 次；`--file-replay` 使用手写程序，`--model-api` 每次独立请求模型。
+
+```powershell
+# 仅准备清单，无网络、无仿真。
+.\run_python.cmd run_evaluation.py --file-replay --execute --dry-run
+
+# 真实模型批量生成与执行，需要已配置百炼地址和密钥。
+.\run_python.cmd run_evaluation.py --model-api --execute
+```
+
+每批保留输入/代码哈希、所有失败、逐试验 CSV 和汇总 JSON；未完成的整批不报告总体成功率。这是当前受限链路的开发基线，不是论文完整任务集。
 
 1. 打开 `outputs/offline_seed0/demo.mp4`，先看抓取、搬运、放置的完整过程。
 2. 在 PowerShell 中执行下列两行，亲自重复一次：

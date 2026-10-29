@@ -3,11 +3,11 @@
 ## 项目事实
 
 - 默认用中文沟通；说明实际修改、验证结果和仍未验证的部分。
-- 本仓库已完成离线手动抓放、文件程序回放，以及百炼 Qwen 真实生成程序驱动的单次/双色抓放：UR5e + Robotiq 2F85 + PyBullet。seed=0 的单物体、同色放置与交叉放置已通过独立目标检查；尚未完成多种子评估或论文实验复现。
+- 本仓库已完成离线手动抓放、文件程序回放，以及百炼 Qwen 真实生成程序驱动的单次/双色抓放：UR5e + Robotiq 2F85 + PyBullet。固定三类任务 × seed 0–4 的开发基线已完成，15/15 次执行和 25 个独立目标均通过；尚未完成论文任务集、基线对比或完整论文复现。
 - 官方快照固定在 `upstream.json` 中的 commit；`code_as_policies/` 保存原始 Notebook、README 和 Apache 2.0 许可证。
-- 当前验证平台为 Windows，已验证 PowerShell 中的项目启动器和 CMD UTF-8 激活运行链路。独立环境为仓库内 `.conda-env/`，Python 3.10.22、NumPy 1.26.4、PyBullet 3.25。依赖以 `environment.yml` 为准。
+- 当前验证平台为 Windows，已验证 PowerShell 中的项目启动器和 CMD UTF-8 激活运行链路。独立环境为仓库内 `.conda-env/`，Python 3.10.22、NumPy 1.26.4、PyBullet 3.2.5。依赖以 `environment.yml` 为准。
 
-## 复现进展交接（更新于 2026-10-28）
+## 复现进展交接（更新于 2026-10-29）
 
 用户关注的主线是 **任务规划：自然语言任务 → 模型生成程序组织动作 → 机械臂执行与验证**。用户已提供百炼北京工作空间地址并配置本机密钥，真实模型生成与仿真已通过最小验收。模型版本为 `qwen3.7-plus-2026-05-26`；这是受限场景内的集成验证，不等于通用任务规划或完整论文复现。
 
@@ -18,7 +18,8 @@
 | 离线抓放 | 已重复验证 seed=0 的蓝色积木 → 黄色碗，产生视频、前后截图、状态轨迹和结果 JSON |
 | 程序接口与离线回放 | `run_planner.py` 保存任务/提示词，解释受限程序并执行有序动作；单次和双色抓放均已通过 seed=0，程序来源明确为手写文件 |
 | 自然语言与任务规划 | **真实调用与 seed=0 最小验收已通过**；单物体、双色同色与交叉放置由模型生成不同程序，独立目标均通过；文件模式仍仅回放手写程序 |
-| 论文实验复现 | **尚未完成**；没有多任务、多种子成功率或对比实验结果 |
+| 固定配置多种子评估 | **已完成小规模开发基线**；三类任务 × seed 0–4，共 15/15 通过，无重试、无提示词修改；不是未见指令泛化评估 |
+| 论文实验复现 | **尚未完成**；现有结果仅覆盖受限抓放清单，没有论文完整任务集或对比实验结果 |
 
 ### 当前代码到底做了什么
 
@@ -31,6 +32,16 @@
 - 新场景 JSON 的 `goals` 是独立评估标签，不来自程序、不发给模型提示词。结果区分 `plan_validated`、`execution_success` 与 `task_success`；只编译或没有独立目标时不能判定任务成功。新入口默认唯一输出目录，拒绝覆盖已有目录。
 
 ### 最近一次已完成的验证
+
+2026-10-29 新增 `run_evaluation.py`、`src/evaluation.py` 与 `examples/evaluation/block_to_bowl_v1.json`。固定三类现有任务和五个 seed，每次独立请求模型，按 seed 优先顺序执行，完整保留原始结果；没有改提示词、受限语法、物理控制或成功判据。批次位于 `outputs/evaluation_qwen_seed0_4_20261029_01/`，协议与结果摘要见 `docs/evaluation.md`。
+
+- 单物体、同色放置、交叉放置各 5/5 通过，总计 15/15；25 个独立目标全部通过。15 次请求均 HTTP 200，返回模型均为 `qwen3.7-plus-2026-05-26`，共 9722 tokens（4500 输入、5222 输出）；无重试、无失败回复替换。
+- 全部轨迹数值有限，抬升和距离从 CSV/最终状态重新计算后与报告一致。25 个目标的最小最大抬升为 0.167155 m，最大最终水平距离为 0.014441 m。全部视频 12 fps、帧数与报告一致；已抽查每个视频的起始、各积木抬升及最终画面，共 55 个关键帧。
+- seed=0 三次轨迹数值与对应的 2026-10-28 模型基线逐项一致。每个 seed 下同色/交叉任务的初始状态完全相同；不同 seed 的布局不同。目标标签未进入提示词；模型仍只看到任务和对象名，不具备已验证的空间推理能力。
+- 48 项无网络 unittest、`build_env.py --check` 和资源检查通过；新增依赖为零。首次沙箱启动仅因输出目录写权限失败，未发出 API 请求；随后在有写权限的执行上下文完成同一批次，未修改 ACL 或覆盖旧输出。
+- 批次保存输入快照、代码/提示词哈希、逐试验 CSV、汇总和核验结果；未完成批次不报告总体成功率。已有任务和 seed=0 参与过开发，不能据 15/15 推断论文基准成功率。
+
+### 此前模型接入验证
 
 2026-10-28 完成真实百炼调用与仿真。4 次请求均 HTTP 200，返回模型均为 `qwen3.7-plus-2026-05-26`，合计用量 2097 tokens（含首次失败）。首次程序含不支持的 `and`，校验器拒绝且未启动仿真；随后只明确提示词中的禁用语法与嵌套条件写法，未扩大解释器白名单，未编辑模型回复。修订后 3 次生成、执行与独立目标均通过。这是调试后的最小验收，不能当作固定提示词的无偏成功率。
 
@@ -65,11 +76,11 @@
 - 同轮 6 项 `unittest` 全通过，`build_env.py --check` 通过。这些是已有验证记录，后续对话不要声称刚刚重新执行过。
 - 该历史验证未覆盖用户在 VS Code 界面中新建终端后的实际反馈、其他操作系统、全新机器安装或多种子成功率；后续模型验证见上节。
 
-### 下一阶段：固定配置的多任务、多种子评估
+### 下一阶段：分层生成与空间接口
 
 1. 已阅读原始 `Interactive_Demo.ipynb` 的 `LMP.__call__`、`LMPFGen`、`LMP_wrapper` 和 `setup_LMP`；对应关系记录在 `docs/planning.md`。本地没有直接调用这条旧 API 链路；递归辅助函数生成、会话记忆和完整几何 API 尚未实现，未知函数会被拒绝。
 2. `src/model_provider.py` 已实现 `ProgramProvider.generate(messages) -> ProgramReply`，CLI 的 `--model-api` 与 `--program-file` 二选一。`config/model.json` 仅保存地址占位符及 `qwen3.7-plus-2026-05-26`，真实工作空间地址由本机环境变量 `CAP_MODEL_BASE_URL` 提供；密钥从 `DASHSCOPE_API_KEY` 读取。地址/模型覆盖优先级为 CLI、环境变量、配置文件，不自动更换模型。官方旧 `openai.Completion.create` / `code-davinci-002` 保留原样。
-3. 最小语言验收已完成。后续固定当前提示词与模型配置，预先定义任务和独立目标，跨多个 seed 记录全部成功、拒绝、规划失败和物理失败；不要边调提示词边汇报统一成功率。
+3. 最小语言验收和三类任务 × 五个 seed 的开发基线已完成。后续扩展分层辅助函数生成、对象位置查询、坐标运算与动作，再覆盖论文桌面任务；新版本另立任务/seed 清单和独立目标，不把调试结果混入固定评估。
 4. `model_api_used=true` 表示尝试发出 HTTP 请求，含失败；需结合 `provider.response_received` / `reply_accepted`、`plan_validated` 与 `task_success` 判定各阶段。缺密钥时不发请求且为 false。继续保存无凭据配置、用量、回复和失败，不保存 HTTP 密钥、错误正文或思考内容；辅助函数仍不支持。
 
 ## 目录与修改入口
@@ -80,6 +91,8 @@
 | `run_planner.py`、`src/planning.py` | 程序来源协议、文件回放、提示词、受限 AST 解释与运行日志；不直接执行生成 Python |
 | `src/model_provider.py`、`config/model.json` | 百炼 HTTPS 适配器与无密钥配置，环境变量读取密钥，拒绝重定向与不完整回复 |
 | `src/plan_execution.py` | 只接收动作数据的可信仿真 worker，独立目标评估、多积木轨迹和失败记录 |
+| `run_evaluation.py`、`src/evaluation.py` | 固定清单的批量评估与汇总；逐试验独立调用，不自动重试，完整记录失败与未运行项 |
+| `examples/evaluation/`、`docs/evaluation.md` | 预定义任务/seed 和评估协议；修改清单另建版本，不改运行中的输入 |
 | `examples/planning/`、`docs/planning.md` | 手写离线样例、场景与独立目标、接口边界和操作说明 |
 | `build_env.py` | 从官方 Notebook 的 7/8/9 号单元（从 0 计数）提取仿真代码，并应用本地适配 |
 | `src/upstream_env.py` | **生成文件**：不要单独手改；修改 `build_env.py` 后重新生成 |
@@ -113,6 +126,9 @@ conda env create --prefix ./.conda-env --file environment.yml
 
 # 配置 DASHSCOPE_API_KEY 后调用百炼；先不执行物理仿真。
 .\run_python.cmd run_planner.py --task "把蓝色积木放进黄色碗" --scene examples/planning/single.json --model-api
+
+# 固定三类任务 × seed 0–4，共 15 次真实生成与仿真；预览可用 --file-replay --execute --dry-run。
+.\run_python.cmd run_evaluation.py --model-api --execute
 ```
 
 - 其他终端可使用 `conda run --prefix ./.conda-env --no-capture-output python ...`；目前未验证其他操作系统的仿真行为。

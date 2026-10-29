@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "id": "block_to_bowl_v1",
+  "description": "Development baseline: three existing tasks, five fixed scene seeds; not the paper benchmark.",
+  "seeds": [0, 1, 2, 3, 4],
+  "tasks": [
+    {
+      "id": "single",
+      "task": "把蓝色积木放进黄色碗",
+      "scene": "../planning/single.json",
+      "program_file": "../planning/single.py"
+    },
+    {
+      "id": "match_colors",
+      "task": "把各个积木放进对应颜色的碗",
+      "scene": "../planning/match_colors.json",
+      "program_file": "../planning/match_colors.py"
+    },
+    {
+      "id": "cross_colors",
+      "task": "把蓝色积木放进红色碗，把红色积木放进蓝色碗",
+      "scene": "../planning/cross_colors.json",
+      "program_file": "../planning/cross_colors.py"
+    }
+  ]
+}
